@@ -7,6 +7,7 @@ import math
 def get_ca(name):
 	pymol.cmd.select('lo_ca','name ca and '+name)
 	pos_ca = pymol.cmd.get_coords('lo_ca',1)
+	pymol.cmd.delete('*ca*')
 	return np.array(pos_ca)
 
 def get_boundary(lo_name):
@@ -20,27 +21,22 @@ def rotate_coordinate(name,coord):
 	mf = coord[0].tolist()+[0]+coord[1].tolist()+[0]+coord[2].tolist()+[0]+[0,0,0,1]
 	pymol.cmd.transform_selection(name,mf)
 
-
 def example():
 	## Reset
 	pymol.cmd.delete('all')
 	pymol.cmd.reset()
 	## Load PDB
-	pymol.cmd.load('examples/input/AL1.pdb')
-	## Select a reference coordinate
-	pymol.cmd.select('po1','resi 10 and name ca')
-	pymol.cmd.select('po2','resi 2 and name ca')
-	pymol.cmd.select('po3','resi 7 and name O')
-	pymol.cmd.select('po4','resi 8 and name N')
+	pymol.cmd.load('structures/input/F8.pdb')
 
 	## Create a periodic unit
-	unit = create_pep_unit('AL1','po1','po2','po3','po4')
-	# unit.rotate_sidechain() ## list of angles
+	# INPUT: (peptide, start residue index, end residue index, does the start residue locate at the face)
+	unit = create_pep_unit('F8',2,8,0)
 
 	## --- Examples of sheet structures ---
-	sheet = create_sheet(unit,[0,11],[0,11])
-	# INPUT: ([aaa/apa/aap/app/paa/ppa/pap/ppp,sidechain flip],num of units per sheet)
-	sheet.build_a_plain_sheet(['pap','d'],5)
+	# INPUT: (peptide unit)
+	sheet = create_sheet(unit)
+	# INPUT: (peptide alignment aaa/apa/aap/app/paa/ppa/pap/ppp, does two beta-sheet aligned face-to-face, num of units per sheet)
+	sheet.build_a_plain_sheet('ppp',1,5)
 	## --- End ---
 	
 	sheet.get_dimension()
@@ -48,51 +44,48 @@ def example():
 
 
 class create_pep_unit():
-	# INPUT (point for the head of x, point for the tail of x, point for the head of y, point for the tail of y)
-	def __init__(self,name,po1,po2,po3,po4):
+	# INPUT (molecule name, start residue index on the linear segment, end residue index on the linear segment)
+	def __init__(self,name,resi_start,resi_end,is_face):
 		# Create a cooridinate
-		coord = self.get_coordinate_by_xy(po1,po2,po3,po4)
+		coord = self.get_coordinate(resi_start,resi_end,is_face)
 		# Align the unit to the coordinate
 		rotate_coordinate(name,coord)
-		self.name = name
+		self.name,self.resi_start,self.resi_end = name,resi_start,resi_end
 		self.set_boundary()
 
-	def get_coordinate_by_xy(self,po1,po2,po3,po4):
-		pos_po1 = np.array(pymol.cmd.get_coords(po1,1)).reshape(3)
-		pos_po2 = np.array(pymol.cmd.get_coords(po2,1)).reshape(3)
-		pos_po3 = np.array(pymol.cmd.get_coords(po3,1)).reshape(3)
-		pos_po4 = np.array(pymol.cmd.get_coords(po4,1)).reshape(3)
-		x = pos_po2 - pos_po1
-		y = pos_po4 - pos_po3
+	def set_x_by_ca(self,resi_start,resi_end):
+		resi_end_even_space = (resi_end-resi_start)//2*2+resi_start
+		pymol.cmd.select('x_po1',f'resi {resi_start} and name ca')
+		pymol.cmd.select('x_po2',f'resi {resi_end_even_space} and name ca')
+		pos_x_po1 = np.array(pymol.cmd.get_coords('x_po1',1)).reshape(3)
+		pos_x_po2 = np.array(pymol.cmd.get_coords('x_po2',1)).reshape(3)
+		pymol.cmd.delete('*po*')
+		return pos_x_po2 - pos_x_po1
+
+	def set_y_by_nh(self,resi_start,resi_end,is_face):
+		acc,vec_acc = 1,0
+		if is_face:
+			resi_start_from_face = resi_start+1
+		else:
+			resi_start_from_face = resi_start
+		for idx_i in range(resi_start_from_face,resi_end+1,2):
+			pymol.cmd.select(f'y{acc}_po1',f'resi {idx_i} and name n')
+			pymol.cmd.select(f'y{acc}_po2',f'resi {idx_i} and name h')
+			pos_yi_po1 = np.array(pymol.cmd.get_coords(f'y{acc}_po1',1)).reshape(3)
+			pos_yi_po2 = np.array(pymol.cmd.get_coords(f'y{acc}_po2',1)).reshape(3)
+			y_i = pos_yi_po2 - pos_yi_po1
+			vec_acc += y_i
+			acc += 1
+			pymol.cmd.delete('*po*')
+		return vec_acc/acc
+
+	def get_coordinate(self,resi_start,resi_end,is_face):
+		x = self.set_x_by_ca(resi_start,resi_end)
+		y = self.set_y_by_nh(resi_start,resi_end,is_face)
 		z = np.cross(x,y)
 		y = np.cross(z,x)
 		unit_x,unit_y,unit_z = x/np.linalg.norm(x),y/np.linalg.norm(y),z/np.linalg.norm(z)
 		return [unit_x,unit_y,unit_z]
-
-	def rotate_sidechain(self,ax,rot,idx):
-		def rotate_atom(ax,idx,theta,ori):
-			init_pos = np.array(pymol.cmd.get_coords('index '+idx,1))-ori_i
-			c,s = np.cos(theta),np.sin(theta)
-			if ax == 'x':
-				m = np.array([[1,0,0],[0,c,-s],[0,s,c]])
-			elif ax == 'y':
-				m = np.array([[c,0,s],[0,1,0],[-s,0,c]])
-			else:
-				m = np.array([[c,-s,0],[s,c,0],[0,0,1]])
-			final_pos = np.dot(m,init_pos.T).T
-			pymol.cmd.translate((final_pos-init_pos)[0].tolist(),'index '+idx)
-
-		# rotate around axis ax
-		for i in idx:
-			resi_i,rot_i = str(i+1),rot[i]
-			# get origin
-			ori_i = get_ca('resi '+resi_i)	
-			# get side chain idx
-			lo_idx = pymol.cmd.index('resi '+resi_i+' and not name CA+N+H+C+O+H1+H2+H3+OXT')
-			# rotate side chain
-			for idx in lo_idx:
-				rotate_atom(ax,str(idx[1]),rot_i*np.pi/180,ori_i)
-			self.set_boundary()
 
 	def set_boundary(self):
 		# Set dimensions
@@ -102,15 +95,21 @@ class create_pep_unit():
 
 
 class create_sheet():
-	def __init__(self,unit,resi,resi_a): 
+	def __init__(self,unit): 
 		self.unit = unit
-		self.resi_start = resi[0]
-		self.resi_end = resi[1]
-		self.resi_a_start = resi_a[0]
-		self.resi_a_end = resi_a[1]
+		self.ca_start = self.map_idx_res2ca(self.unit.resi_start)
+		self.ca_end = self.map_idx_res2ca((self.unit.resi_end-self.unit.resi_start)//2*2+self.unit.resi_start)
 
-	def build_a_plain_sheet(self,alignment,num_half):
-		b_alignment,s_alignment = alignment
+	def map_idx_res2ca(self,idx):
+		pymol.cmd.select('all_ca',f'name ca')
+		idx_all_ca = pymol.cmd.index('all_ca')
+		pymol.cmd.select('this_ca',f'resi {idx} and name ca')
+		idx_this_ca = pymol.cmd.index('this_ca')
+		idx_new = idx_all_ca.index(idx_this_ca[0])
+		pymol.cmd.delete('*ca*')
+		return idx_new
+
+	def build_a_plain_sheet(self,b_alignment,s_alignment,num_half):
 		b_flip_angle = self.get_b_flip_angle(b_alignment)
 		s_flip_angle = self.get_s_flip_angle(s_alignment)
 		z_offset = self.unit.z/2.0
@@ -175,34 +174,31 @@ class create_sheet():
 			return None
 
 	def get_s_flip_angle(self,s_alignment):
-		if s_alignment == 's':
+		if s_alignment:
 			return [0,0]
-		elif s_alignment == 'd':
-			return [180,180]
 		else:
-			return None
+			return [180,180]
 
 	def affine_transformation_sidechain(self,name,angle): # rotate z-axis than x-axis
 		angle_y,angle_z = angle
 		pymol.cmd.rotate('z',angle_z,name)
 		pymol.cmd.rotate('y',angle_y,name)
 		# Correct pos
-		pos_com = np.mean(get_ca(name)[self.resi_start:self.resi_end],0)
+		pos_com = np.mean(get_ca(name)[self.ca_start:self.ca_end+1],0)
 		pymol.cmd.translate([0,-pos_com[1],0],name)	
-
 
 	def affine_transformation_backbone(self,name,angle): # rotate y-axis than z-axis
 		angle_y,angle_z = angle
 		pymol.cmd.rotate('y',angle_y,name)
 		pymol.cmd.rotate('z',angle_z,name)
 		# Correct pos
-		pos_com = np.mean(get_ca(name)[self.resi_start:self.resi_end],0)
+		pos_com = np.mean(get_ca(name)[self.ca_start:self.ca_end+1],0)
 		pymol.cmd.translate([0,-pos_com[1],0],name)
 		if  (angle_y+angle_z)%360 != 0:
-			pos_x_init = get_ca(name)[self.resi_a_end][0]
+			pos_x_init = get_ca(name)[self.ca_end][0]
 		else:
-			pos_x_init = get_ca(name)[self.resi_a_start][0]
-		pymol.cmd.translate([-pos_x_init,0,0],name)			
+			pos_x_init = get_ca(name)[self.ca_start][0]
+		pymol.cmd.translate([-pos_x_init,0,0],name)		
 
 	def show_unit(self):
 		pymol.cmd.color('cyan','p_s1_pep2_*')

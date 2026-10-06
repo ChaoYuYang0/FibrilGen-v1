@@ -8,6 +8,7 @@ from pymol.cgo import *
 def get_ca(name):
 	pymol.cmd.select('lo_ca','name ca and '+name)
 	pos_ca = pymol.cmd.get_coords('lo_ca',1)
+	pymol.cmd.delete('*lo_ca*')
 	return np.array(pos_ca)
 
 def get_com(name):
@@ -94,17 +95,10 @@ def example(morphology):
 	pymol.cmd.reset()
 	## Load PDB
 	pymol.cmd.load('structures/input/capF8_bilayer.pdb')
-	## Select a reference coordinate
-	pymol.cmd.select('p1','resi 21-30')
-	pymol.cmd.select('p2','resi 31-40')
-	pymol.cmd.select('p3','resi 111-120')
-	pymol.cmd.select('p4','resi 121-130')
-	pymol.cmd.select('po1','resi 22 and name ca')
-	pymol.cmd.select('po2','resi 29 and name ca')
-	pymol.cmd.select('po3','resi 62 and name ca')
 
 	## Create a periodic unit
-	unit = create_sheet_unit('p1','p2','p3','p4','po1','po2','po3')
+	# INPUT: (peptide length, the number of peptides per sheet, start residue index, end residue index)
+	unit = create_sheet_unit(10,9,2,9)
 
 	## Create a fibril object
 	fibril = create_fibril(unit)
@@ -140,15 +134,11 @@ def example(morphology):
 
 
 class create_sheet_unit():
-	# INPUT (sheet 1 peptide 1, sheet 1 peptide 2, sheet 2 peptide 1, sheet 2 peptide 2, point for x head, point for x tail, point for y)
-	def __init__(self,pep1_s1,pep2_s1,pep1_s2,pep2_s2,po1,po2,po3):
+	def __init__(self,len_pep,num_pep_per_sheet,resi_start,resi_end):
 		# Create a unit
-		pymol.cmd.create('s1_pep1',pep1_s1,0,0,1)
-		pymol.cmd.create('s1_pep2',pep2_s1,0,0,1)
-		pymol.cmd.create('s2_pep1',pep1_s2,0,0,1)
-		pymol.cmd.create('s2_pep2',pep2_s2,0,0,1)
+		self.get_four_peptides(num_pep_per_sheet,len_pep)
 		# Create a cooridinate
-		coord = self.get_coordinate_by_xy(po1,po2,po3)
+		coord = self.get_coordinate(len_pep,num_pep_per_sheet,resi_start,resi_end)
 		# Center the unit
 		pymol.cmd.group('unit','s1_pep1 s1_pep2 s2_pep1 s2_pep2')
 		com = np.mean(get_ca('unit'),0)
@@ -176,18 +166,69 @@ class create_sheet_unit():
 		# Draw bounding box
 		draw_box(get_bounding_vertices(self.box_boundaries),'UnitBox')
 
+	def get_x(self,len_pep,num_pep_per_sheet,resi_start,resi_end):
+		def get_vec(acc_start,acc_end):
+			pymol.cmd.select('x_po1',f'resi {acc_start} and name ca')
+			pymol.cmd.select('x_po2',f'resi {acc_end} and name ca')
+			pos_x_po1 = np.array(pymol.cmd.get_coords('x_po1',1)).reshape(3)
+			pos_x_po2 = np.array(pymol.cmd.get_coords('x_po2',1)).reshape(3)
+			pymol.cmd.delete('*x_po*')
+			return pos_x_po2 - pos_x_po1
 
-	def get_coordinate_by_xy(self,po1,po2,po3):
-		pos_po1 = np.array(pymol.cmd.get_coords(po1,1)).reshape(3)
-		pos_po2 = np.array(pymol.cmd.get_coords(po2,1)).reshape(3)
-		pos_po3 = np.array(pymol.cmd.get_coords(po3,1)).reshape(3)
-		x = pos_po2 - pos_po1
-		y = pos_po3 - pos_po1
+		num_unit = num_pep_per_sheet//2
+		pep_indices = [0,1,num_unit*2-2,num_unit*2-2+1,num_pep_per_sheet,num_pep_per_sheet+1,num_pep_per_sheet+num_unit*2-2,num_pep_per_sheet+num_unit*2-2+1]
+		ref_x = get_vec(pep_indices[0]*len_pep+resi_start,pep_indices[0]*len_pep+resi_end)
+		acc_x = ref_x+0
+		for pep_index in pep_indices[1:]:
+			current_x = get_vec(pep_index*len_pep+resi_start,pep_index*len_pep+resi_end)
+			same_direction = np.sum(ref_x*current_x)>0
+			if same_direction:
+				acc_x += current_x
+			else:
+				acc_x -= current_x
+		return acc_x/8
+
+	def get_y(self,len_pep,num_pep_per_sheet,resi_start,resi_end):
+		def get_vec(acc_start,acc_end):
+			pymol.cmd.select('y_po1',f'resi {acc_start} and name ca')
+			pymol.cmd.select('y_po2',f'resi {acc_end} and name ca')
+			pos_y_po1 = np.array(pymol.cmd.get_coords('y_po1',1)).reshape(3)
+			pos_y_po2 = np.array(pymol.cmd.get_coords('y_po2',1)).reshape(3)
+			pymol.cmd.delete('*y_po*')
+			return pos_y_po2 - pos_y_po1
+
+		num_unit = num_pep_per_sheet//2
+		paired_pep_indices = [[0,num_unit*2-2],[1,num_unit*2-2+1],[num_pep_per_sheet,num_pep_per_sheet+num_unit*2-2],[num_pep_per_sheet+1,num_pep_per_sheet+num_unit*2-2+1]]
+		acc_y = 0
+		for pep_indices in paired_pep_indices:
+			for i in range(resi_start,resi_end+1):
+				current_y = get_vec(pep_indices[0]*len_pep+i,pep_indices[1]*len_pep+i)
+				acc_y += current_y
+		return acc_y/((resi_end-resi_start+1)*4)
+
+	def get_four_peptides(self,num_pep_per_sheet,len_pep):
+		idx_sheet_middle = num_pep_per_sheet//2
+		resi_range1 = f'{idx_sheet_middle*len_pep+1}-{(idx_sheet_middle+1)*len_pep}'
+		resi_range2 = f'{(idx_sheet_middle+1)*len_pep+1}-{(idx_sheet_middle+2)*len_pep}'
+		resi_range3 = f'{(num_pep_per_sheet+idx_sheet_middle)*len_pep+1}-{(num_pep_per_sheet+idx_sheet_middle+1)*len_pep}'
+		resi_range4 = f'{(num_pep_per_sheet+idx_sheet_middle+1)*len_pep+1}-{(num_pep_per_sheet+idx_sheet_middle+2)*len_pep}'
+		pymol.cmd.select('p1',f'resi {resi_range1}')
+		pymol.cmd.select('p2',f'resi {resi_range2}')
+		pymol.cmd.select('p3',f'resi {resi_range3}')
+		pymol.cmd.select('p4',f'resi {resi_range4}')
+		pymol.cmd.create('s1_pep1','p1',0,0,1)
+		pymol.cmd.create('s1_pep2','p2',0,0,1)
+		pymol.cmd.create('s2_pep1','p3',0,0,1)
+		pymol.cmd.create('s2_pep2','p4',0,0,1)
+		return
+
+	def get_coordinate(self,len_pep,num_pep_per_sheet,resi_start,resi_end):
+		x = self.get_x(len_pep,num_pep_per_sheet,resi_start,resi_end)
+		y = self.get_y(len_pep,num_pep_per_sheet,resi_start,resi_end)
 		z = np.cross(x,y)
 		x = np.cross(y,z) 
 		unit_x,unit_y,unit_z = x/np.linalg.norm(x),y/np.linalg.norm(y),z/np.linalg.norm(z)
 		return [unit_x,unit_y,unit_z]
-
 
 class create_fibril():
 	def __init__(self,unit): 
@@ -197,6 +238,8 @@ class create_fibril():
 		self.tilt_s2 = 0
 		# Default tolorence
 		self.dist_tolorence = 0.6
+		# Defalut for output
+		self.write_output = 1
 
 	def check_unit(self,angle_z,angle_y,z_sign,y_sign,radius):
 		max_twist = 0
@@ -251,7 +294,6 @@ class create_fibril():
 				
 		pymol.cmd.delete('test*')
 		return 1		
-
 
 	def build_a_flat_sheet(self,num_half):
 		# Build the first sheet of the bilayer
@@ -322,7 +364,6 @@ class create_fibril():
 		self.set_dimension(0,0,0,self.unit.b)
 		return
 
-
 	def build_a_rod(self,angle_z,num_half,sign):
 		radius = self.unit.d/2.0
 		# Refine the input geometry
@@ -330,6 +371,7 @@ class create_fibril():
 		if param == None:
 			print ('Please decrease tilt angle!')
 			print ('Stop to update ... ')
+			self.write_output = 0
 			return
 		else:
 			theta_z,theta_y,y = param
@@ -358,6 +400,7 @@ class create_fibril():
 			pymol.cmd.group('a_rod','nr_*')
 			pymol.cmd.group('visBox','vis_*')
 			self.set_dimension(radius,theta_z,theta_y,y)
+			self.write_output = 1
 			return
 
 	def build_a_stacked_rod(self,angle_z,stacking,num_half,sign):
@@ -379,6 +422,7 @@ class create_fibril():
 		if (param == None):
 			print ('Please decrease tilt angle!')
 			print ('Stop to update ... ')
+			self.write_output = 0
 			return
 		else:
 			# Stacking
@@ -419,6 +463,7 @@ class create_fibril():
 			pymol.cmd.group('s_rod','snr_*')
 			pymol.cmd.group('visBox','vis_*')
 			self.set_dimension(max(radius_matrix.reshape(-1)),theta_z,theta_y,y)
+			self.write_output = 1
 			return
 
 	def build_a_ribbon(self,angle_z,radius,num_half,sign):
@@ -428,6 +473,7 @@ class create_fibril():
 		if param == None:
 			print ('Please decrease tilt angle or try another radius!')
 			print ('Stop to update ... ')
+			self.write_output = 0
 			return
 		else:
 			theta_z,theta_y,radius,y = param
@@ -462,6 +508,7 @@ class create_fibril():
 			pymol.cmd.group('a_ribbon','r_*')
 			pymol.cmd.group('visBox','vis_*')
 			self.set_dimension(radius,theta_z,theta_y,y)
+			self.write_output = 1
 			return
 
 	def build_a_stacked_ribbon(self,angle_z,radius,angle_stack,num_stack,num_half,sign):
@@ -471,6 +518,7 @@ class create_fibril():
 		if param == None:
 			print ('Please decrease tilt angle, try another radius, or try another stack angle!')
 			print ('Stop to update ... ')
+			self.write_output = 0
 			return		
 		else:
 			theta_z,theta_y,radius,y = param
@@ -508,8 +556,8 @@ class create_fibril():
 			pymol.cmd.group('s_ribbon','sr_*')
 			pymol.cmd.group('visBox','vis_*')
 			self.set_dimension(radius,theta_z,theta_y,y)
+			self.write_output = 1
 			return
-
 
 	def set_dimension(self,radius,theta_z,theta_y,y):
 		self.radius = radius
@@ -531,7 +579,6 @@ class create_fibril():
 		print ('Twist angle: '+str(self.angle_y)+' degree')
 		print ('Period: '+str(self.period)+' peptides')
 		return
-
 
 	def refine_theta(self,theta_z,radius,sign):
 		# Refine the structure by 40 iterations
@@ -568,7 +615,6 @@ class create_fibril():
 					theta_z -= 0.02
 		self.set_dimension(radius,theta_z,theta_y,y)
 		return None
-
 
 	def refine_stack_rod(self,theta_z,lo_radius,sign):
 		# Refine the structure by 40 iterations

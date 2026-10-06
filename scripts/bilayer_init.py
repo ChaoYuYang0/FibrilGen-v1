@@ -3,19 +3,15 @@ pymol.cmd.run('pep2unit.py')
 ## Reset
 pymol.cmd.reset()
 
-## Select a reference coordinate
-pymol.cmd.select('po1','resi 1 and name ca')
-pymol.cmd.select('po2','resi 7 and name ca')
-pymol.cmd.select('po3','resi 2 and name c')
-pymol.cmd.select('po4','resi 2 and name o')
-
 ## Create a periodic unit
-unit = create_pep_unit('pep','po1','po2','po3','po4')
+# INPUT: (peptide, start residue index, end residue index, does the start residue locate at the face)
+unit = create_pep_unit('pep',2,8,0)
 
 ## --- Examples of sheet structures ---
-sheet = create_sheet(unit,[0,7],[1,7])
-# INPUT: ([aaa/apa/aap/app/paa/ppa/pap/ppp,sidechain flip],num of units per sheet)
-sheet.build_a_plain_sheet(['aaa','s'],5)
+# INPUT: (peptide unit)
+sheet = create_sheet(unit)
+# INPUT: (peptide alignment aaa/apa/aap/app/paa/ppa/pap/ppp, does two beta-sheet aligned face-to-face, num of units per sheet)
+sheet.build_a_plain_sheet('ppa',1,5)
 ## --- End ---
 
 # Import openbabel and optimization library

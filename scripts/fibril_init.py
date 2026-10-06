@@ -9,18 +9,10 @@ pymol.cmd.reset()
 ## Load PDB
 pymol.cmd.load('structures/input/capF8_bilayer.pdb')
 
-## Select a reference unit
-pymol.cmd.select('p1','resi 21-30')
-pymol.cmd.select('p2','resi 31-40')
-pymol.cmd.select('p3','resi 111-120')
-pymol.cmd.select('p4','resi 121-130')
-## Select a reference coordinate
-pymol.cmd.select('po1','resi 22 and name ca')
-pymol.cmd.select('po2','resi 29 and name ca')
-pymol.cmd.select('po3','resi 62 and name ca')
-
 ## Create a periodic unit
-unit = create_sheet_unit('p1','p2','p3','p4','po1','po2','po3')
+# INPUT: (peptide length, the number of peptides per sheet, start residue index, end residue index)
+unit = create_sheet_unit(10,9,2,9)
+
 ## Create a fibril object
 fibril = create_fibril(unit)
 

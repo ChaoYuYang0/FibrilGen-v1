@@ -4,31 +4,38 @@ import sys
 sys.path.append(f'{abspath}/../../')
 
 from pep2unit import *
+from reordering import *
+
+def mol2pdb_convertsion(filename):
+	os.system(f'obabel {filename}.mol -O {filename}_temp.pdb')
+	pymol.cmd.load(f'{filename}_temp.pdb')
+	pymol.cmd.save(f'{filename}.pdb',f'{filename}_temp')
+	os.system(f'rm {filename}_temp.pdb')
 
 ## Load PDB
-pymol.cmd.load(f'F8.pdb')
-## Select a reference coordinate
-pymol.cmd.select('po1','resi 1 and name ca')
-pymol.cmd.select('po2','resi 7 and name ca')
-pymol.cmd.select('po3','resi 2 and name c')
-pymol.cmd.select('po4','resi 2 and name o')
+pymol.cmd.load('F8.pdb')
 
 ## Create a periodic unit
-unit = create_pep_unit('F8','po1','po2','po3','po4')
-# unit.rotate_sidechain() ## list of angles
+# INPUT: (peptide, start residue index, end residue index, does the start residue locate at the face)
+unit = create_pep_unit('F8',2,8,0)
 
 ## --- Examples of sheet structures ---
-sheet = create_sheet(unit,[0,7],[1,7])
-# INPUT: ([aaa/apa/aap/app/paa/ppa/pap/ppp,sidechain flip],num of units per sheet)
-sheet.build_a_plain_sheet(['aaa','s'],5)
+# INPUT: (peptide unit)
+sheet = create_sheet(unit)
+# INPUT: (peptide alignment aaa/apa/aap/app/paa/ppa/pap/ppp, does two beta-sheet aligned face-to-face, num of units per sheet)
+sheet.build_a_plain_sheet('ppa',1,5)
 ## --- End ---
 
 ## Save the structure
 pymol.cmd.save('bilayer.pdb','plain_sheet')
+ordering_indices('','bilayer.pdb','bilayer_indexed.pdb')
 
 # Import openbabel and optimization library
 from optimize import *
 # Remove steric clashes
 pymol.cmd.create('plain_sheet_em','plain_sheet')
-minimize('plain_sheet_em',nsteps0=100)
+minimize('plain_sheet_em',nsteps0=10)
 pymol.cmd.save('bilayer_em.mol','plain_sheet_em')
+mol2pdb_convertsion('bilayer_em')
+ordering_indices('','bilayer_em.pdb','bilayer_em_indexed.pdb')
+reordering_indices('','bilayer_indexed','bilayer_em_indexed','bilayer_em_indexed2',20,8)

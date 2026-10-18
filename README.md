@@ -141,7 +141,7 @@ python3 fibril_init.py
 ```
 
 ## Generate new structures from your Google Colab (instead of PyMOL)
-You can use FibrilGen in a Jupyter notebook to demonstrate hypothetical cross-beta structures and their fibril morphologies. For an example file, please refer to [directory of FibrilGen]/demo/Google_Colab/my_first_demo.ipynb
+You can use FibrilGen in a Jupyter notebook to demonstrate hypothetical cross-beta structures and their fibril morphologies. Please refer to [demo_Colab](https://github.com/ChaoYuYang0/FibrilGen-v1/blob/main/demo_Colab.ipynb) as an example.
 
 ## Applications
 ### 1. Reconstruction/ generation of compact fibril structures

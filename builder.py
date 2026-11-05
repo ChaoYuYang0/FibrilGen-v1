@@ -238,6 +238,8 @@ class create_fibril():
 		self.tilt_s2 = 0
 		# Default tolorence
 		self.dist_tolorence = 0.6
+		# Default refinement iterations
+		self.num_iterations = 40
 		# Defalut for output
 		self.write_output = 1
 
@@ -582,7 +584,7 @@ class create_fibril():
 
 	def refine_theta(self,theta_z,radius,sign):
 		# Refine the structure by 40 iterations
-		for i in range(40):
+		for i in range(self.num_iterations):
 			# Calculate the twist angle
 			k = self.unit.b*np.sin(theta_z)
 			theta_y = np.arccos(1-0.5*(k/radius)**2)
@@ -600,7 +602,7 @@ class create_fibril():
 
 	def refine_theta_radius(self,theta_z,radius,sign):
 		# Refine the structure by 40 iterations
-		for i in range(40):
+		for i in range(self.num_iterations):
 			# Calculate the twist angle
 			k = self.unit.b*np.sin(theta_z)
 			theta_y = np.arccos(1-0.5*(k/radius)**2)
@@ -619,7 +621,7 @@ class create_fibril():
 	def refine_stack_rod(self,theta_z,lo_radius,sign):
 		# Refine the structure by 40 iterations
 		radius = min(lo_radius)	# check from the outermost sheet
-		for i in range(40):
+		for i in range(self.num_iterations):
 			k = self.unit.b*np.sin(theta_z)
 			theta_y = np.arccos(1-0.5*(k/radius)**2)
 			y = self.unit.b*np.cos(theta_z)
@@ -663,7 +665,7 @@ class create_fibril():
 					return 'too_far'
 
 		# Refine the structure by 40 iterations
-		for i in range(40):
+		for i in range(self.num_iterations):
 			# Calculate the twist angle
 			k = self.unit.b*np.sin(theta_z)
 			theta_y = np.arccos(1-0.5*(k/radius)**2)

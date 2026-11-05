@@ -6,7 +6,6 @@ sys.path.append(f'{abspath}/../../')
 from builder import *
 
 ## Load PDB
-# pymol.cmd.load('bilayer_indexed.pdb')
 pymol.cmd.load(f'{abspath}/../..//structures/input/capF8_bilayer.pdb')
 
 ## Create a periodic unit
@@ -32,9 +31,10 @@ fibril.build_a_stacked_ribbon(10,30,90,3,20,1)
 ## --- End ---
 
 ## Save structures
-# pymol.cmd.save('a_sheet.pdb','plain_sheet')
-# pymol.cmd.save('s_sheet.pdb','plain_sheet')
-# pymol.cmd.save('a_rod.pdb','a_rod')
-# pymol.cmd.save('s_rod.pdb','s_rod')
-# pymol.cmd.save('a_ribbon.pdb','a_ribbon')
-pymol.cmd.save('s_ribbon.pdb','s_ribbon')
+if fibril.write_output == 1:
+	# pymol.cmd.save('a_sheet.pdb','plain_sheet')
+	# pymol.cmd.save('s_sheet.pdb','plain_sheet')
+	# pymol.cmd.save('a_rod.pdb','a_rod')
+	# pymol.cmd.save('s_rod.pdb','s_rod')
+	# pymol.cmd.save('a_ribbon.pdb','a_ribbon')
+	pymol.cmd.save('s_ribbon.pdb','s_ribbon')

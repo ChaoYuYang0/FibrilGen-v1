@@ -574,12 +574,12 @@ class create_fibril():
 		return
 
 	def get_dimension(self):
-		print ('Radius: '+str(self.radius/10.0)+' nm')
+		print ('Radius: %.2f nm'%(self.radius/10.0))
 		if self.period != float('inf'):
-			print ('Pitch length: '+str(self.pitch/10)+' nm')
-		print ('Tilt angle: '+str(self.angle_z)+' degree')
-		print ('Twist angle: '+str(self.angle_y)+' degree')
-		print ('Period: '+str(self.period)+' peptides')
+			print ('Pitch length: %.2f nm'%(self.pitch/10))
+		print ('Tilt angle: %.2f degrees'%(self.angle_z))
+		print ('Twist angle: %.2f degrees'%(self.angle_y))
+		print ('Period: %.2f peptides'%(self.period))
 		return
 
 	def refine_theta(self,theta_z,radius,sign):

@@ -65,9 +65,9 @@ class create_pep_unit():
 	def set_y_by_nh(self,resi_start,resi_end,is_face):
 		acc,vec_acc = 1,0
 		if is_face:
-			resi_start_from_face = resi_start
-		else:
 			resi_start_from_face = resi_start+1
+		else:
+			resi_start_from_face = resi_start
 		for idx_i in range(resi_start_from_face,resi_end+1,2):
 			pymol.cmd.select(f'y{acc}_po1',f'resi {idx_i} and name n')
 			pymol.cmd.select(f'y{acc}_po2',f'resi {idx_i} and name h')

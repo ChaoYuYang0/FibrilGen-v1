@@ -9,7 +9,7 @@ FibrilGen project is maintained with updated versions:
 
 2. This version, “FibrilGen-v1”, includes a Python script for side-chain optimisation $^{2}$, a Python script that converts peptide sequences to beta-strands, and structure generation without the PyMOL interface (e.g., in the terminal or in Google Colab).
 
-3. A FibrilGen tutorial is available at the [link](https://drive.google.com/file/d/1AwXRHb-ublHDoCGDNNRTas9vLqcPvWi9/view?usp=drive_link) using a [Jupyter notebook](https://github.com/ChaoYuYang0/FibrilGen-v1/blob/main/demo_Colab.ipynb).
+3. A FibrilGen tutorial is available at the [link](https://drive.google.com/file/d/1AwXRHb-ublHDoCGDNNRTas9vLqcPvWi9/view?usp=drive_link) using the [Jupyter notebook](https://github.com/ChaoYuYang0/FibrilGen-v1/blob/main/demo_Colab.ipynb).
 
 ![plot](demo/demo-fig1.png)
 

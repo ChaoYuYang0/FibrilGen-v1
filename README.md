@@ -1,7 +1,7 @@
 # FibrilGen-v1
-Engineering cross-beta nanofibril morphologies and physicochemical properties is attractive for many biomedical applications, such as cell culture and controlled drug release. However, rational design of cross-beta structures is often challenging because peptide assembly varies and crystallised conditions for obtaining high-resolution cryogenic electron microscopy (cryo-EM) and solid-state nuclear magnetic resonance data are limited. It is worth exploring how computational tools can accelerate investigations into the structural basis and morphological variations of cross-beta nanofibrils.
+Cross-beta nanofibrils are versatile in their supramolecular morphologies, and the involved noncovalent bonding. Understaning how peptides can energetically stabilze cross-beta nanofibril is useful to uncover amyloid aggregation and design sythetic peptide materials for cell culture and controlled drug release. Cross-beta nanofibrils require oriented nocovalent bonds to stabilize the structures. One of the fastest way to achieve this is by directly arraging the peptides into fibrils and then running molecular dynamics simulations to evalute the overall structural stability. 
 
-FibrilGen is a Python library for constructing various cross-beta structures using controllable parameters. These structures can be built to fit experimental observations (e.g., cryo-EM or ssNMR data) or be fully hypothetical. A FibrilGen/MD workflow can screen geometrically feasible and energetically favourable cross-beta structures. 
+FibrilGen is a Python library for bottom-up construction of various cross-beta structures using user-initiated parameters. These structures can be built to fit experimental observations (e.g., cryo-EM or ssNMR data) or be fully hypothetical. A FibrilGen/MD workflow can screen geometrically feasible and energetically favourable cross-beta structures. 
 
 FibrilGen project is maintained with updated versions:
 
@@ -24,25 +24,36 @@ FibrilGen has six functions in the "fibril" class. Input parameters required for
 5. fibril.build_a_ribbon( $\theta_z$, $r_y$, $N$, the sign of $\theta_y$ ). The function “build_a_ribbon” takes an input parameter $N$ to stack the 2 x 2 units along the fibril long axis. An initial helical twist is assigned with a tilt angle $\theta_z$, a radius $r_y$, and the direction (assigned as 1 or -1) of the twist angle $\theta_y$.
 6. fibril.build_a_stacked_ribbon( $\theta_z$, $r_y$, $\theta_s$, $M$, $N$, the sign of $\theta_y$ ). The function “build_a_stacked_ribbon” takes the input parameter $N$ to stack the 2 x 2 units along the fibril long axis. It assigns rotational stacking on the fibril cross-section, with an incremental rotation angle $\theta_s$ repeated $M$ times. An initial helical twist is assigned with a tilt angle $\theta_z$, a radius $r_y$, and the direction (assigned as 1 or -1) of the twist angle $\theta_y$. Here, the tube is a special case where $\theta_s M=360°$.
 
-## Requirement of external Python libraries $^{3,4,5}$
+## Build a FibrilGen structure from scratch (an overview)
+- Create a peptide molecule from a peptide sequence (using the Python script pep_init.py)/ An user defined peptide molecule -> 
+
+- Create a bilayer structure (using the Python script bilayer_init.py)/ An user defined periodic structure -> 
+
+- Generate a cross-beta structure (using the Python script fibril_init.py)
+
+There are six fibril classes to choose from: flat_sheet, stacked_sheet, rod, stacked_rod, ribbon, stacked_ribbon. Each fibril class refer to a parameter set to control the fibril morphology and the fibril size. User controllable parameters are $N$, **K**, $\theta_z$, $r_y$, $M$, $\theta_s$ and the sign of $\theta_y$. FibrilGen takes the input stacking paramters (parameters **K**, $M$, and $\theta_s$) as constants to refine the helical twist (parameters $r_y$, $\theta_z$ and $\theta_y$).
+
+## Installation information (external Python libraries see $^{3,4,5}$)
 ```bash
 # Install PyMOL
 conda install -c conda-forge pymol-open-source
 # Install OpenBabel
 conda install conda-forge::openbabel
+# Download FibrilGen
+git clone https://github.com/ChaoYuYang0/FibrilGen-v1
 ```
-## PyMOL structure visualisation
-Users can import the FibrilGen library into PyMOL to generate and visualise fibril structures. Compatible PyMOL versions include v2.3.5 (commercial), v1.7.4.5 (educational), and v2.3.0 (open-source).
+- Users can import the FibrilGen library into PyMOL to generate and visualise fibril structures. Compatible PyMOL versions include v2.3.5 (commercial), v1.7.4.5 (educational), and v2.3.0 (open-source).
 
-## Generate example structures in PyMOL
-### 1. Import FibrilGen library
+## Use PyMOL platform (ideal for visualisation) 
+### For generating example structures 
+#### 1. Import FibrilGen library
 ```bash
 # Change the current directory to FibrilGen
 cd [directory of FibrilGen]
 # Import FibrilGen library 
 run builder.py
 ```
-### 2. Build FibrilGen structures
+#### 2. Build FibrilGen structures
 ```bash
 # Demonstrate building a beta-sheet structure
 example('a_sheet')
@@ -57,14 +68,14 @@ example('a_ribbon')
 #  Demonstrate building a stacked ribbon structure
 example('s_ribbon')
 ```
-### 3. Output structures
+#### 3. Visualize fibril structures
 
 ![plot](demo/demo-fig2.png)
 
 Figure 2. Output structures after calling (a) example('a_sheet'), (b) example('s_sheet'), (c) example('a_rod'), (d) example('a_ribbon'), (e) example('s_rod'), or (f) example('s_ribbon').
 
-## Generate new building blocks in PyMOL
-### 1. Modify scripts/pep_init.py to initialise a beta-strand
+### For generating new structures
+#### 1. Modify scripts/pep_init.py to initialise a beta-strand
 ```bash
 # Import seq2pep library
 pymol.cmd.run('seq2pep.py')
@@ -76,11 +87,11 @@ set_chi_angle(3,'n','ca','cb','cg',-20)
 set_chi_angle(5,'n','ca','cb','cg',-20)
 set_chi_angle(7,'n','ca','cb','cg',-20)
 ```
-### 2. Execute pep_init.py in the command line
+#### 2. Execute pep_init.py in the command line
 ```bash
 run scripts/pep_init.py
 ```
-### 3. Modify scripts/bilayer_init.py to initialise a bilayer beta-sheet structure
+#### 3. Modify scripts/bilayer_init.py to initialise a bilayer beta-sheet structure
 ```bash
 # Import pep2unit library
 pymol.cmd.run('pep2unit.py')
@@ -95,18 +106,17 @@ pymol.cmd.run('optimize.py')
 # Remove steric clashes
 minimize('plain_sheet',nsteps0=100)
 ```
-### 4. Execute bilayer_init.py in the command line
+#### 4. Execute bilayer_init.py in the command line
 ```bash
 run scripts/bilayer_init.py
 ```
-### 5. Output structures
+#### 5. Visualize bilayer structures
 
 ![plot](demo/demo-fig3.png)
 
 Figure 3. Build a bilayer structure. (a) Select a linear segment (e.g., start residue index 2 and end residue index 8) and assign the face side for the segment (assign 1 for the start residue at the face side and 0 for the start residue at the back side). (b) Assign the backbone alignment by the intra-sheet backbone alignment of the inner sheet, the inter-sheet backbone alignment of the first beta-strand in the inner sheet and the first beta-strand in the outer sheet, and the intra-sheet backbone alignment of the outer sheet (e.g., "ppa" stands for the inner parallel sheet and the outer antiparallel sheet aligned parallelly). For visualisation, green labels the inner sheet, and orange labels the outer sheet. (c) Assign the outer sheet alignment face as 1 for face-to-face alignment (as shown) and 0 for face-to-back alignment. 
 
-## Generate new fibril structures in PyMOL
-### 1. Modify scripts/fibril_init.py to initialise a cross-beta nanostructure
+#### 6. Modify scripts/fibril_init.py to initialise a cross-beta nanostructure
 ```bash
 # Import FibrilGen library
 pymol.cmd.run('builder.py')
@@ -119,18 +129,17 @@ fibril = create_fibril(unit)
 # Build a cross-beta structure (e.g., a ribbon)
 fibril.build_a_stacked_ribbon(10,30,90,3,20,1) # INPUT: (tilt angle, radius, stacking angle, stacking number, num of units per sheet, twist sign)
 ```
-### 2. Execute fibril_init.py in the command line
+#### 7. Execute fibril_init.py in the command line
 ```bash
 run scripts/fibril_init.py
 ```
-### 3. Output structures
+#### 8. Visualize fibril structures
 
 ![plot](demo/demo-fig4.png)
 
 Figure 4. Build a cross-beta structure. (a) Assign parameters for the reference bilayer structure. In this example bilayer structure, nine 10-mer peptides are assembled for each beta-sheet, and the segment for backbone alignment starts from residue index 2 to 9. (b) Assign parameters for generating a fibril structure. In this example ribbon structure, the units are stacked on the fibril cross-section ($\theta_s=90$, $M=3$) and along the fibril axis ($N=20$). The fibril is assigned a left-handed twist (the sign of $\theta_y$ equals 1). The assigned initial helical twist ($\theta_z=10$, $r_y=30$) is automatically refined to avoid steric clashes.
 
-## Generate new structures from your terminal (instead of PyMOL)
-You can use FibrilGen for large-scale structure generation or virtual screening. 
+## Use terminal (ideal for large-scale structure generation or virtual screening)
 ```bash
 # Change the current directory to your script
 cd [directory of FibrilGen]/scripts/by_terminal/
@@ -142,7 +151,7 @@ python3 bilayer_init.py
 python3 fibril_init.py
 ```
 
-## Generate new structures from your Google Colab (instead of PyMOL)
+## Use Google Colab (ideal for demostration)
 You can use FibrilGen in a Jupyter notebook to demonstrate hypothetical cross-beta structures and their fibril morphologies. Please refer to [demo_Colab](https://github.com/ChaoYuYang0/FibrilGen-v1/blob/main/demo_Colab.ipynb) as an example.
 
 ## Applications

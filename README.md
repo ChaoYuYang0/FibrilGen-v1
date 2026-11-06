@@ -15,7 +15,7 @@ FibrilGen project is maintained with updated versions:
 
 Figure 1. FibrilGen modelling of cross-beta structures. (a) A 2 x 2 alignment of a beta-strand. (b) A refinement of sidechain orientation (e.g., by energy minimisation). (c) Vertical stacking of a 2 x 2 building block, where $N$ is the number of units along the vertical axis. (d) Horizontal stacking of the basic unit, where **K** is a binary matrix of $k_1$ x $k_2$ that assigns the presence of units in $k_1$ rows and $k_2$ columns. (e) Vertical twisting of the basic unit, where $\theta_z$ is the tilt angle from the vertical axis, and $\theta_y$ is the twist angle around the vertical axis. The sign of $\theta_y$ is 1 for left-handed chirality and -1 for right-handed chirality. (f) Horizontal stacking of the basic unit, where $\theta_s$ is the angular displacement and $M$ is the number of units displaced by $0$, $\theta_s$, ..., $(M-1)\theta_s$. (g) Vertical twisting of the basic unit, where $r_y$ is the radius displaced from the vertical axis. FibrilGen automatically adjusts the twist parameters $\theta_y$, $\theta_z$, and $r_y$ to ensure the assembled structure is compact and non-intersecting. 
 
-## Descriptions for library functions
+## Description of fibril classes
 FibrilGen has six functions in the "fibril" class. Input parameters required for each function are described below.
 1. fibril.build_a_flat_sheet ( $N$ ). The function “build_a_flat_sheet” takes only one parameter, $N$, to specify the repeat of the 2 x 2 unit along the beta-sheet axis.
 2. fibril.build_a_stacked_sheet ( **K**, $N$ ). The function “build_a_stacked_sheet” takes $N$ and **K** as input to stack the 2 x 2 units along the fibril long axis and across the fibril cross-section, respectively.
@@ -35,17 +35,21 @@ FibrilGen has six functions in the "fibril" class. Input parameters required for
 
 - Refer to pep2unit.py [[source]](https://github.com/ChaoYuYang0/FibrilGen-v1/blob/main/pep2unit.py)
   - class create_pep_unit(pep_filename: str, start_residue_index: int, end_residue_index: int, is_face_side: boolean)
-  - class create_sheet.build_a_plain_sheet(peptide_alignment: str, is_face_to_face: boolean, num_units: int)
+  - class create_sheet(unit: object create_pep_unit)
+  - create_sheet.build_a_plain_sheet(peptide_alignment: str, is_face_to_face: boolean, num_units: int)
 
 3. Generate a cross-beta structure
 
 - Refer to builder.py [[source]](https://github.com/ChaoYuYang0/FibrilGen-v1/blob/main/builder.py)
-  - class create_fibril.build_a_flat_sheet(num_units: int)
-  - class create_fibril.build_a_stacked_sheet(k_matrix: list, num_units: int)
-  - class create_fibril.build_a_rod(tilt_angle: float, num_units: int, twist_sign: int)
-  - class create_fibril.build_a_stacked_rod(tilt_angle: float, k_matrix: list, num_units: int, twist_sign: int)
-  - class create_fibril.build_a_ribbon(tilt_angle: float, radius: float, num_units: int, twist_sign: int)
-  - class create_fibril.build_a_stacked_ribbon(tilt_angle: float, radius: float, neighbouring_stacking_angle: float, M_stacking: int, num_units: int, twist_sign: int)
+- peptide length, the number of peptides per sheet, start residue index, end residue index
+  - class create_sheet_unit(len_pep: int, num_peps: init, start_residue_index: int, end_residue_index: int)
+  - class create_fibril(unit: object create_sheet_unit)
+  - create_fibril.build_a_flat_sheet(num_units: int)
+  - create_fibril.build_a_stacked_sheet(k_matrix: list, num_units: int)
+  - create_fibril.build_a_rod(tilt_angle: float, num_units: int, twist_sign: int)
+  - create_fibril.build_a_stacked_rod(tilt_angle: float, k_matrix: list, num_units: int, twist_sign: int)
+  - create_fibril.build_a_ribbon(tilt_angle: float, radius: float, num_units: int, twist_sign: int)
+  - create_fibril.build_a_stacked_ribbon(tilt_angle: float, radius: float, neighbouring_stacking_angle: float, M_stacking: int, num_units: int, twist_sign: int)
 
 ## Installation information (external Python libraries $^{3,4,5}$)
 ```bash

@@ -1,5 +1,5 @@
 # FibrilGen-v1
-Cross-beta nanofibrils are versatile in their supramolecular morphologies, and the involved noncovalent bonding. Understaning how peptides can energetically stabilze cross-beta nanofibril is useful to uncover amyloid aggregation and design sythetic peptide materials for cell culture and controlled drug release. Cross-beta nanofibrils require oriented nocovalent bonds to stabilize the structures. One of the fastest way to achieve this is by directly arraging the peptides into fibrils and then running molecular dynamics simulations to evalute the overall structural stability. 
+Cross-beta nanofibrils are versatile assembled structures with diverse supramolecular morphologies and noncovalent bonding. Understanding how peptides can energetically stabilise cross-beta nanofibrils helps uncover amyloid aggregation and design synthetic peptide materials for cell culture and controlled drug release. Cross-beta nanofibrils require oriented noncovalent bonds to stabilise the structures. One of the fastest ways to do this is to arrange the peptides into fibrils and then run molecular dynamics simulations to evaluate overall structural stability. 
 
 FibrilGen is a Python library for bottom-up construction of various cross-beta structures using user-initiated parameters. These structures can be built to fit experimental observations (e.g., cryo-EM or ssNMR data) or be fully hypothetical. A FibrilGen/MD workflow can screen geometrically feasible and energetically favourable cross-beta structures. 
 
@@ -13,7 +13,7 @@ FibrilGen project is maintained with updated versions:
 
 ![plot](demo/demo-fig1.png)
 
-Figure 1. FibrilGen modelling of cross-beta structures. (a) A 2 x 2 alignment of a beta-strand. (b) A refinement of sidechain orientation (e.g., by energy minimization). (c) Vertical stacking of a 2 x 2 building block, where $N$ is the number of units along the vertical axis. (d) Horizontal stacking of the basic unit, where **K** is a binary matrix of $k_1$ x $k_2$ that assigns the presence of units in $k_1$ rows and $k_2$ columns. (e) Vertical twisting of the basic unit, where $\theta_z$ is the tilt angle from the vertical axis, and $\theta_y$ is the twist angle around the vertical axis. The sign of $\theta_y$ is 1 for left-handed chirality and -1 for right-handed chirality. (f) Horizontal stacking of the basic unit, where $\theta_s$ is the angular displacement and $M$ is the number of units displaced by $0$, $\theta_s$, ..., $(M-1)\theta_s$. (g) Vertical twisting of the basic unit, where $r_y$ is the radius displaced from the vertical axis. FibrilGen automatically adjusts the twist parameters $\theta_y$, $\theta_z$, and $r_y$ to ensure the assembled structure is compact and non-intersecting. 
+Figure 1. FibrilGen modelling of cross-beta structures. (a) A 2 x 2 alignment of a beta-strand. (b) A refinement of sidechain orientation (e.g., by energy minimisation). (c) Vertical stacking of a 2 x 2 building block, where $N$ is the number of units along the vertical axis. (d) Horizontal stacking of the basic unit, where **K** is a binary matrix of $k_1$ x $k_2$ that assigns the presence of units in $k_1$ rows and $k_2$ columns. (e) Vertical twisting of the basic unit, where $\theta_z$ is the tilt angle from the vertical axis, and $\theta_y$ is the twist angle around the vertical axis. The sign of $\theta_y$ is 1 for left-handed chirality and -1 for right-handed chirality. (f) Horizontal stacking of the basic unit, where $\theta_s$ is the angular displacement and $M$ is the number of units displaced by $0$, $\theta_s$, ..., $(M-1)\theta_s$. (g) Vertical twisting of the basic unit, where $r_y$ is the radius displaced from the vertical axis. FibrilGen automatically adjusts the twist parameters $\theta_y$, $\theta_z$, and $r_y$ to ensure the assembled structure is compact and non-intersecting. 
 
 ## Library functions
 FibrilGen has six functions in the "fibril" class. Input parameters required for each function are described below.
@@ -25,15 +25,15 @@ FibrilGen has six functions in the "fibril" class. Input parameters required for
 6. fibril.build_a_stacked_ribbon( $\theta_z$, $r_y$, $\theta_s$, $M$, $N$, the sign of $\theta_y$ ). The function “build_a_stacked_ribbon” takes the input parameter $N$ to stack the 2 x 2 units along the fibril long axis. It assigns rotational stacking on the fibril cross-section, with an incremental rotation angle $\theta_s$ repeated $M$ times. An initial helical twist is assigned with a tilt angle $\theta_z$, a radius $r_y$, and the direction (assigned as 1 or -1) of the twist angle $\theta_y$. Here, the tube is a special case where $\theta_s M=360°$.
 
 ## Build a FibrilGen structure from scratch (an overview)
-- Create a peptide molecule from a peptide sequence (using the Python script pep_init.py)/ An user defined peptide molecule -> 
+1. Create a peptide molecule from a peptide sequence (using the Python script pep_init.py)/ A user-defined peptide molecule -> 
 
-- Create a bilayer structure (using the Python script bilayer_init.py)/ An user defined periodic structure -> 
+2. Create a bilayer structure (using the Python script bilayer_init.py)/ A user-defined periodic structure -> 
 
-- Generate a cross-beta structure (using the Python script fibril_init.py)
+3. Generate a cross-beta structure (using the Python script fibril_init.py)
 
-There are six fibril classes to choose from: flat_sheet, stacked_sheet, rod, stacked_rod, ribbon, stacked_ribbon. Each fibril class refer to a parameter set to control the fibril morphology and the fibril size. User controllable parameters are $N$, **K**, $\theta_z$, $r_y$, $M$, $\theta_s$ and the sign of $\theta_y$. FibrilGen takes the input stacking paramters (parameters **K**, $M$, and $\theta_s$) as constants to refine the helical twist (parameters $r_y$, $\theta_z$ and $\theta_y$).
+- To generate a cross-beta structure, choose one of six fibril classes: flat_sheet, stacked_sheet, rod, stacked_rod, ribbon, stacked_ribbon. Each fibril class refers to a parameter set that controls fibril size and morphology (as described in the Library functions). User controllable parameters are $N$, **K**, $\theta_z$, $r_y$, $M$, $\theta_s$ and the sign of $\theta_y$ (Figure 1 c-g). FibrilGen takes the input stacking parameters (**K**, $M$, and $\theta_s$) as constants to refine the helical twist parameters ($r_y$, $\theta_z$, and $\theta_y$) accordingly.
 
-## Installation information (external Python libraries see $^{3,4,5}$)
+## Installation information (external Python libraries $^{3,4,5}$)
 ```bash
 # Install PyMOL
 conda install -c conda-forge pymol-open-source
@@ -68,7 +68,7 @@ example('a_ribbon')
 #  Demonstrate building a stacked ribbon structure
 example('s_ribbon')
 ```
-#### 3. Visualize fibril structures
+#### 3. Visualise fibril structures
 
 ![plot](demo/demo-fig2.png)
 
@@ -110,7 +110,7 @@ minimize('plain_sheet',nsteps0=100)
 ```bash
 run scripts/bilayer_init.py
 ```
-#### 5. Visualize bilayer structures
+#### 5. Visualise bilayer structures
 
 ![plot](demo/demo-fig3.png)
 
@@ -133,13 +133,13 @@ fibril.build_a_stacked_ribbon(10,30,90,3,20,1) # INPUT: (tilt angle, radius, sta
 ```bash
 run scripts/fibril_init.py
 ```
-#### 8. Visualize fibril structures
+#### 8. Visualise fibril structures
 
 ![plot](demo/demo-fig4.png)
 
 Figure 4. Build a cross-beta structure. (a) Assign parameters for the reference bilayer structure. In this example bilayer structure, nine 10-mer peptides are assembled for each beta-sheet, and the segment for backbone alignment starts from residue index 2 to 9. (b) Assign parameters for generating a fibril structure. In this example ribbon structure, the units are stacked on the fibril cross-section ($\theta_s=90$, $M=3$) and along the fibril axis ($N=20$). The fibril is assigned a left-handed twist (the sign of $\theta_y$ equals 1). The assigned initial helical twist ($\theta_z=10$, $r_y=30$) is automatically refined to avoid steric clashes.
 
-## Use terminal (ideal for large-scale structure generation or virtual screening)
+## Use terminal (ideal for large-scale structure generation and virtual screening)
 ```bash
 # Change the current directory to your script
 cd [directory of FibrilGen]/scripts/by_terminal/
@@ -151,7 +151,7 @@ python3 bilayer_init.py
 python3 fibril_init.py
 ```
 
-## Use Google Colab (ideal for demostration)
+## Use Google Colab (ideal for demonstration)
 You can use FibrilGen in a Jupyter notebook to demonstrate hypothetical cross-beta structures and their fibril morphologies. Please refer to [demo_Colab](https://github.com/ChaoYuYang0/FibrilGen-v1/blob/main/demo_Colab.ipynb) as an example.
 
 ## Applications

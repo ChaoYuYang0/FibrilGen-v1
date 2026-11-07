@@ -124,7 +124,7 @@ def example(morphology):
 		fibril.build_a_ribbon(10,30,60,-1)
 	## Build a stacked ribbon (tilt angle, radius, stacking angle, stacking number, num of units per sheet, twist sign)
 	elif morphology == 's_ribbon':
-		fibril.build_a_stacked_ribbon(10,30,70,2,20,1)
+		fibril.build_a_stacked_ribbon(10,30,110,2,20,1)
 	else:
 		print ('Unknown morphology!')
 	## --- End ---
@@ -682,8 +682,8 @@ class create_fibril():
 			elif (good_unit and contact=='too_far'):
 				radius -= 1
 				theta_z += 0.02
-			else:
-				radius += (np.random.randint(3)-1)
+			elif theta_z > 0.02:
+				theta_z -= 0.02
 		self.set_dimension(radius,theta_z,theta_y,y)
 		return None
 

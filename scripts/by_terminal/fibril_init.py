@@ -6,11 +6,11 @@ sys.path.append(f'{abspath}/../../')
 from builder import *
 
 ## Load PDB
-pymol.cmd.load(f'{abspath}/../..//structures/input/capF8_bilayer.pdb')
+pymol.cmd.load('bilayer_em_indexed2.pdb')
 
 ## Create a periodic unit
 # INPUT: (peptide length, the number of peptides per sheet, start residue index, end residue index)
-unit = create_sheet_unit(10,9,2,9)
+unit = create_sheet_unit(8,10,2,8)
 
 ## Create a fibril object
 fibril = create_fibril(unit)
@@ -27,7 +27,7 @@ fibril = create_fibril(unit)
 ## Build a ribbon (tilt angle, radius, num of units per sheet, twist sign)
 # fibril.build_a_ribbon(30,60,10,-1)
 ## Build a stacked ribbon (tilt angle, radius, stacking angle, stacking number, num of units per sheet, twist sign)
-fibril.build_a_stacked_ribbon(10,30,90,3,20,1)
+fibril.build_a_stacked_ribbon(10,30,70,3,20,1)
 ## --- End ---
 
 ## Save structures

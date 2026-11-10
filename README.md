@@ -26,9 +26,9 @@ FibrilGen project is maintained with updated versions:
 3. A FibrilGen tutorial is available at the [link](https://drive.google.com/file/d/1MTyDqrCgGgY4DKYdg-if-vIs8gnKz2fu/view?usp=drive_link) using the [Jupyter notebook](demo_Colab.ipynb).
 
 ## Prerequistes
-For users who want to use the GUI to build and visualise cross-beta structures, see [this Jupyter notebook](demo_Colab.ipynb). For developers who want to program cross-beta structures, please refer to the API reference and the source code. Either way, FibrilGen runs smoothly on personal computers.
+For users who want to use the GUI to build and visualise cross-beta structures, see [this Jupyter notebook](demo_Colab.ipynb). For developers who want to program cross-beta structures, please refer to the API reference and the source code. You can run example codes smoothly on personal computers.
 
-## Core API reference
+## Core API
 1. Create a peptide molecule from a peptide sequence
 
 - Refer to seq2pep.py [[source]](seq2pep.py)
@@ -40,19 +40,19 @@ For users who want to use the GUI to build and visualise cross-beta structures, 
 - Refer to pep2unit.py [[source]](pep2unit.py)
   - class create_pep_unit(pep_filename: str, start_residue_index: int, end_residue_index: int, is_face_side: boolean)
   - class create_sheet(unit: object create_pep_unit)
-  - create_sheet.build_a_plain_sheet(peptide_alignment: str, is_face_to_face: boolean, num_units: int)
+  - sheet.build_a_plain_sheet(peptide_alignment: str, is_face_to_face: boolean, num_units: int)
 
 3. Generate a cross-beta structure from a bilayer structure
 
 - Refer to builder.py [[source]](builder.py)
-  - class create_sheet_unit(len_pep: int, num_peps: init, start_residue_index: int, end_residue_index: int)
+  - class create_sheet_unit(len_pep: int, num_peps: int, start_residue_index: int, end_residue_index: int)
   - class create_fibril(unit: object create_sheet_unit)
-  - create_fibril.build_a_flat_sheet(num_units: int)
-  - create_fibril.build_a_stacked_sheet(k_matrix: list, num_units: int)
-  - create_fibril.build_a_rod(tilt_angle: float, num_units: int, twist_sign: int)
-  - create_fibril.build_a_stacked_rod(tilt_angle: float, k_matrix: list, num_units: int, twist_sign: int)
-  - create_fibril.build_a_ribbon(tilt_angle: float, radius: float, num_units: int, twist_sign: int)
-  - create_fibril.build_a_stacked_ribbon(tilt_angle: float, radius: float, neighbouring_stacking_angle: float, M_stacking: int, num_units: int, twist_sign: int)
+  - fibril.build_a_flat_sheet(num_units: int)
+  - fibril.build_a_stacked_sheet(k_matrix: list, num_units: int)
+  - fibril.build_a_rod(tilt_angle: float, num_units: int, twist_sign: int)
+  - fibril.build_a_stacked_rod(tilt_angle: float, k_matrix: list, num_units: int, twist_sign: int)
+  - fibril.build_a_ribbon(tilt_angle: float, radius: float, num_units: int, twist_sign: int)
+  - fibril.build_a_stacked_ribbon(tilt_angle: float, radius: float, neighbouring_stacking_angle: float, M_stacking: int, num_units: int, twist_sign: int)
 
 ## Installation information (external Python libraries $^{3,4,5}$)
 ```bash

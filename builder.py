@@ -97,7 +97,7 @@ def example(morphology):
 	pymol.cmd.load('structures/input/capF8_bilayer.pdb')
 
 	## Create a periodic unit
-	# INPUT: (peptide length, the number of peptides per sheet, start residue index, end residue index)
+	# INPUT: (peptide length, the number of peptides per sheet, start residue index, end residue index, swap_sheets=False)
 	unit = create_sheet_unit(10,9,2,9)
 
 	## Create a fibril object
@@ -134,11 +134,11 @@ def example(morphology):
 
 
 class create_sheet_unit():
-	def __init__(self,len_pep,num_pep_per_sheet,resi_start,resi_end):
+	def __init__(self,len_pep,num_pep_per_sheet,resi_start,resi_end,swap_sheets=False):
 		# Create a unit
 		self.get_four_peptides(num_pep_per_sheet,len_pep)
 		# Create a cooridinate
-		coord = self.get_coordinate(len_pep,num_pep_per_sheet,resi_start,resi_end)
+		coord = self.get_coordinate(len_pep,num_pep_per_sheet,resi_start,resi_end,(1-swap_sheets)*2-1)
 		# Center the unit
 		pymol.cmd.group('unit','s1_pep1 s1_pep2 s2_pep1 s2_pep2')
 		com = np.mean(get_ca('unit'),0)
@@ -222,8 +222,8 @@ class create_sheet_unit():
 		pymol.cmd.create('s2_pep2','p4',0,0,1)
 		return
 
-	def get_coordinate(self,len_pep,num_pep_per_sheet,resi_start,resi_end):
-		x = self.get_x(len_pep,num_pep_per_sheet,resi_start,resi_end)
+	def get_coordinate(self,len_pep,num_pep_per_sheet,resi_start,resi_end,sign):
+		x = sign*self.get_x(len_pep,num_pep_per_sheet,resi_start,resi_end)
 		y = self.get_y(len_pep,num_pep_per_sheet,resi_start,resi_end)
 		z = np.cross(x,y)
 		x = np.cross(y,z) 
